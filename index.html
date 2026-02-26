@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Basketball Scoreboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Basketball Scoreboard — Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -14,94 +14,89 @@
   <div class="scoreboard">
 
     <!-- Header -->
-    <div class="header" id="mainHeader">
-      <span class="header-logo header-logo-link" id="headerLeagueName" onclick="openLeagueEditor()" title="Edit league name">⬡ Hoops</span>
+    <div class="header">
+      <span class="header-logo header-logo-link" id="headerLeagueName" onclick="openLeagueEditor()" title="Edit league name">&#x2B21; Hoops</span>
       <span class="period-label" id="periodLabel">1st Quarter</span>
-      <span class="header-logo" style="opacity:0.4">Scoreboard</span>
+      <span class="header-logo" style="opacity:0.4">Admin</span>
     </div>
 
-    <!-- Main scores -->
-    <div class="main">
+    <!-- SCORES: two team cards side by side -->
+    <div class="scores-row">
 
-      <!-- Home Team -->
+      <!-- Home -->
       <div class="team home">
         <input class="team-name-input" id="homeName" value="HOME" maxlength="8" />
         <div class="score-display" id="homeScore">0</div>
         <div class="score-btns">
-          <button class="btn pts1" onclick="addScore('home', 1)">+1</button>
-          <button class="btn pts2" onclick="addScore('home', 2)">+2</button>
           <button class="btn pts3" onclick="addScore('home', 3)">+3</button>
-          <button class="btn minus" onclick="addScore('home', -1)">−</button>
+          <button class="btn pts2" onclick="addScore('home', 2)">+2</button>
+          <button class="btn pts1" onclick="addScore('home', 1)">+1</button>
+          <button class="btn minus" onclick="addScore('home', -1)">&#8722;</button>
         </div>
-        <!-- Logo upload -->
-        <div class="logo-upload-zone" id="homeLogoZone" onclick="document.getElementById('homeLogoInput').click()" title="Upload team logo">
+        <div class="logo-upload-zone" id="homeLogoZone" onclick="document.getElementById('homeLogoInput').click()" title="Upload logo">
           <img class="logo-preview" id="homeLogoImg" src="" alt="" style="display:none;" />
-          <span class="logo-placeholder" id="homeLogoPlaceholder">＋ Logo</span>
-          <button class="logo-remove" id="homeLogoRemove" onclick="removeLogo(event,'home')" style="display:none;" title="Remove">✕</button>
+          <span class="logo-placeholder" id="homeLogoPlaceholder">+ Logo</span>
+          <button class="logo-remove" id="homeLogoRemove" onclick="removeLogo(event,'home')" style="display:none;" title="Remove">X</button>
         </div>
         <input type="file" id="homeLogoInput" accept="image/*" style="display:none;" onchange="uploadLogo(event,'home')" />
       </div>
 
-      <!-- Center -->
-      <div class="center">
-
-        <!-- Quarter Clock -->
-        <div class="clock-section">
-          <div class="section-label">QUARTER CLOCK</div>
-          <div class="timer" id="timer">12:00.00</div>
-          <div class="timer-controls">
-            <div class="btn-icon" id="playBtn" onclick="toggleTimer()" title="Start / Stop">▶</div>
-            <div class="btn-icon" onclick="resetTimer()" title="Reset Clock">↺</div>
-            <div class="btn-icon edit-mins-btn" onclick="openMinsEditor()" title="Set minutes per quarter">✎</div>
-          </div>
-        </div>
-
-        <!-- Period -->
-        <div class="period-control">
-          <div class="period-num" id="periodNum">1</div>
-          <div class="period-sub">Period</div>
-          <div class="period-btns">
-            <div class="btn-icon sm" onclick="changePeriod(-1)">−</div>
-            <div class="btn-icon sm" onclick="changePeriod(1)">+</div>
-          </div>
-        </div>
-
-        <!-- Shot Clock -->
-        <div class="shot-clock-section">
-          <div class="section-label">SHOT CLOCK</div>
-          <div class="shot-clock" id="shotClock">24</div>
-          <div class="shot-clock-controls">
-            <div class="btn-icon sc-btn" onclick="setShotClock(24)" title="Set 24s">24</div>
-            <div class="btn-icon sc-btn" onclick="setShotClock(14)" title="Set 14s">14</div>
-            <div class="btn-icon" id="scPlayBtn" onclick="toggleShotClock()" title="Start / Stop Shot Clock">▶</div>
-            <div class="btn-icon" onclick="resetShotClock()" title="Reset Shot Clock">↺</div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Away Team -->
+      <!-- Away -->
       <div class="team away">
         <input class="team-name-input" id="awayName" value="AWAY" maxlength="8" />
         <div class="score-display" id="awayScore">0</div>
         <div class="score-btns">
-          <button class="btn pts1" onclick="addScore('away', 1)">+1</button>
-          <button class="btn pts2" onclick="addScore('away', 2)">+2</button>
           <button class="btn pts3" onclick="addScore('away', 3)">+3</button>
-          <button class="btn minus" onclick="addScore('away', -1)">−</button>
+          <button class="btn pts2" onclick="addScore('away', 2)">+2</button>
+          <button class="btn pts1" onclick="addScore('away', 1)">+1</button>
+          <button class="btn minus" onclick="addScore('away', -1)">&#8722;</button>
         </div>
-        <!-- Logo upload -->
-        <div class="logo-upload-zone" id="awayLogoZone" onclick="document.getElementById('awayLogoInput').click()" title="Upload team logo">
+        <div class="logo-upload-zone" id="awayLogoZone" onclick="document.getElementById('awayLogoInput').click()" title="Upload logo">
           <img class="logo-preview" id="awayLogoImg" src="" alt="" style="display:none;" />
-          <span class="logo-placeholder" id="awayLogoPlaceholder">＋ Logo</span>
-          <button class="logo-remove" id="awayLogoRemove" onclick="removeLogo(event,'away')" style="display:none;" title="Remove">✕</button>
+          <span class="logo-placeholder" id="awayLogoPlaceholder">+ Logo</span>
+          <button class="logo-remove" id="awayLogoRemove" onclick="removeLogo(event,'away')" style="display:none;" title="Remove">X</button>
         </div>
         <input type="file" id="awayLogoInput" accept="image/*" style="display:none;" onchange="uploadLogo(event,'away')" />
       </div>
 
-    </div><!-- /main -->
+    </div>
 
-    <!-- Fouls row -->
+    <!-- CLOCKS: quarter clock | period | shot clock -->
+    <div class="clocks-row">
+
+      <div class="clock-cell">
+        <div class="section-label">QUARTER CLOCK</div>
+        <div class="timer" id="timer">12:00.00</div>
+        <div class="timer-controls">
+          <div class="btn-icon" id="playBtn" onclick="toggleTimer()" title="Play / Pause">&#9654;</div>
+          <div class="btn-icon" onclick="resetTimer()" title="Reset">&#8635;</div>
+          <div class="btn-icon edit-mins-btn" onclick="openMinsEditor()" title="Set minutes">&#9998;</div>
+        </div>
+      </div>
+
+      <div class="period-cell">
+        <div class="period-num" id="periodNum">1</div>
+        <div class="period-sub">Period</div>
+        <div class="period-btns">
+          <div class="btn-icon sm" onclick="changePeriod(-1)">&#8722;</div>
+          <div class="btn-icon sm" onclick="changePeriod(1)">+</div>
+        </div>
+      </div>
+
+      <div class="clock-cell">
+        <div class="section-label">SHOT CLOCK</div>
+        <div class="shot-clock" id="shotClock">24</div>
+        <div class="shot-clock-controls">
+          <div class="btn-icon sc-btn" onclick="setShotClock(24)">24</div>
+          <div class="btn-icon sc-btn" onclick="setShotClock(14)">14</div>
+          <div class="btn-icon" id="scPlayBtn" onclick="toggleShotClock()">&#9654;</div>
+          <div class="btn-icon" onclick="resetShotClock()">&#8635;</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FOULS -->
     <div class="fouls-row">
       <div class="fouls-panel">
         <span class="fouls-label">Fouls</span>
@@ -115,24 +110,28 @@
       </div>
     </div>
 
-    <!-- Footer -->
+    <!-- FOOTER / STICKY ACTION BAR -->
     <div class="footer">
+
       <div class="possession">
-        <span class="poss-label">Possession</span>
-        <div class="poss-arrow home" id="possHome" onclick="setPossession('home')" title="Home ball"></div>
-        <div class="poss-arrow away inactive" id="possAway" onclick="setPossession('away')" title="Away ball"></div>
+        <span class="poss-label">Ball</span>
+        <div class="poss-arrow home" id="possHome" onclick="setPossession('home')"></div>
+        <div class="poss-arrow away inactive" id="possAway" onclick="setPossession('away')"></div>
       </div>
-      <button class="buzzer-btn" onclick="buzzer()">🔔 Buzzer</button>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <button class="theme-btn" onclick="openThemeModal()" title="Change theme">🎨 Theme</button>
-        <button class="reset-btn" onclick="resetAll()">Reset All</button>
-        <button class="viewer-link-btn" onclick="window.open('viewer.html','_blank')">📺 Open Viewer</button>
+
+      <button class="buzzer-btn" onclick="buzzer()">&#128276; BUZZER</button>
+
+      <div class="footer-right">
+        <button class="footer-sm-btn theme-btn" onclick="openThemeModal()" title="Theme">&#127912;</button>
+        <button class="footer-sm-btn viewer-link-btn" onclick="window.open('viewer.html','_blank')" title="Viewer">&#128250;</button>
+        <button class="footer-sm-btn reset-btn" onclick="resetAll()" title="Reset All">&#8635;</button>
       </div>
+
     </div>
 
-  </div><!-- /scoreboard -->
+  </div>
 
-  <!-- ── Minutes-per-quarter modal ── -->
+  <!-- Minutes modal -->
   <div class="modal-overlay" id="minsModal">
     <div class="modal">
       <div class="modal-title">Minutes Per Quarter</div>
@@ -145,71 +144,69 @@
           <button class="mins-opt" onclick="setMinsPerQuarter(20)">20</button>
         </div>
         <div class="custom-mins">
-          <input type="number" id="customMins" min="1" max="60" placeholder="Custom (1–60)" />
+          <input type="number" id="customMins" min="1" max="60" placeholder="Custom (1-60)" />
           <button class="btn" onclick="applyCustomMins()">Set</button>
         </div>
       </div>
-      <button class="modal-close" onclick="closeMinsEditor()">✕ Close</button>
+      <button class="modal-close" onclick="closeMinsEditor()">Close</button>
     </div>
   </div>
 
-  <!-- ── Theme picker modal ── -->
+  <!-- Theme modal -->
   <div class="modal-overlay" id="themeModal">
     <div class="modal theme-modal">
-      <div class="modal-title">🎨 Theme Colors</div>
+      <div class="modal-title">Theme Colors</div>
       <div class="modal-body">
-
-        <!-- Preset themes -->
         <div class="theme-section-label">Presets</div>
         <div class="theme-presets" id="themePresets"></div>
-
-        <!-- Custom colors -->
         <div class="theme-section-label" style="margin-top:18px;">Custom Colors</div>
         <div class="theme-custom-grid">
           <div class="theme-custom-row">
             <label>Header / Accent</label>
-            <input type="color" id="colorAccent"   value="#FF5E1A" oninput="applyCustomTheme()" />
+            <input type="color" id="colorAccent" value="#FF5E1A" oninput="applyCustomTheme()" />
           </div>
           <div class="theme-custom-row">
             <label>Home Team</label>
-            <input type="color" id="colorHome"     value="#FF5E1A" oninput="applyCustomTheme()" />
+            <input type="color" id="colorHome" value="#FF5E1A" oninput="applyCustomTheme()" />
           </div>
           <div class="theme-custom-row">
             <label>Away Team</label>
-            <input type="color" id="colorAway"     value="#00C2FF" oninput="applyCustomTheme()" />
+            <input type="color" id="colorAway" value="#00C2FF" oninput="applyCustomTheme()" />
           </div>
           <div class="theme-custom-row">
             <label>Clock</label>
-            <input type="color" id="colorClock"    value="#FFD600" oninput="applyCustomTheme()" />
+            <input type="color" id="colorClock" value="#FFD600" oninput="applyCustomTheme()" />
           </div>
           <div class="theme-custom-row">
             <label>Background</label>
-            <input type="color" id="colorBg"       value="#0D0D0D" oninput="applyCustomTheme()" />
+            <input type="color" id="colorBg" value="#0D0D0D" oninput="applyCustomTheme()" />
           </div>
           <div class="theme-custom-row">
             <label>Panel</label>
-            <input type="color" id="colorPanel"    value="#161616" oninput="applyCustomTheme()" />
+            <input type="color" id="colorPanel" value="#161616" oninput="applyCustomTheme()" />
           </div>
         </div>
       </div>
-      <button class="modal-close" onclick="closeThemeModal()">✕ Close</button>
+      <button class="modal-close" onclick="closeThemeModal()">Close</button>
     </div>
   </div>
 
-  <!-- ── League name modal ── -->
+  <!-- League name modal -->
   <div class="modal-overlay" id="leagueModal">
-    <div class="modal" style="min-width:280px;">
+    <div class="modal">
       <div class="modal-title">League Name</div>
       <div class="modal-body">
         <div class="custom-mins">
-          <input type="text" id="leagueInput" maxlength="20" placeholder="e.g. NBA, PBA, UAAP" style="width:200px;font-family:'Barlow Condensed',sans-serif;font-size:18px;background:var(--panel2);border:1.5px solid #444;color:var(--text);padding:8px 12px;border-radius:2px;outline:none;letter-spacing:1px;" />
+          <input type="text" id="leagueInput" maxlength="20" placeholder="e.g. NBA, PBA, UAAP"
+            style="width:200px;font-family:'Barlow Condensed',sans-serif;font-size:18px;background:var(--panel2);border:1.5px solid #444;color:var(--text);padding:8px 12px;border-radius:2px;outline:none;letter-spacing:1px;" />
           <button class="btn" onclick="applyLeagueName()">Set</button>
         </div>
       </div>
-      <button class="modal-close" onclick="closeLeagueEditor()">✕ Close</button>
+      <button class="modal-close" onclick="closeLeagueEditor()">Close</button>
     </div>
   </div>
 
   <script src="script.js"></script>
 </body>
 </html>
+
