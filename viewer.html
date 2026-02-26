@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live Scoreboard — Viewer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent:     #FF5E1A;
+      --yellow:     #FFD600;
+      --red:        #FF3333;
+      --dark:       #0A0A0A;
+      --panel:      #131313;
+      --panel2:     #1A1A1A;
+      --divider:    #222;
+      --text:       #F5F0E8;
+      --muted:      #4a4a4a;
+      --home-color: #FF5E1A;
+      --away-color: #00C2FF;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      background: var(--dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Barlow Condensed', sans-serif;
+      color: var(--text);
+      overflow: hidden;
+      transition: background 0.5s;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        repeating-linear-gradient(90deg, rgba(255,94,26,0.018) 0px, transparent 1px, transparent 120px),
+        repeating-linear-gradient(0deg,  rgba(255,94,26,0.018) 0px, transparent 1px, transparent 120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Viewer wrapper ── */
+    .viewer {
+      position: relative;
+      z-index: 1;
+      width: 99vw;
+      max-width: 1400px;
+      background: var(--panel);
+      border: 1px solid #1e1e1e;
+      border-radius: 6px;
+      box-shadow: 0 0 120px rgba(255,94,26,0.1), 0 0 400px rgba(0,0,0,0.95);
+      overflow: hidden;
+      transition: background 0.5s;
+    }
+
+    /* ── Top bar ── */
+    .top-bar {
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 40px;
+      transition: background 0.5s;
+    }
+    .top-bar-brand {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 6px;
+      color: #000;
+    }
+    .top-bar-period {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px;
+      letter-spacing: 4px;
+      color: #000;
+      opacity: 0.75;
+    }
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      letter-spacing: 3px;
+      color: #000;
+      opacity: 0.85;
+      text-transform: uppercase;
+    }
+    .live-badge::before {
+      content: '';
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #000;
+      animation: blink 1.2s ease-in-out infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.15; }
+    }
+
+    /* ── Scores row ── */
+    .scores-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      border-bottom: 1px solid var(--divider);
+    }
+
+    /* ── Team blocks ── */
+    .team-block {
+      padding: 36px 40px 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .team-block.home { border-right: 1px solid var(--divider); }
+    .team-block.away { border-left:  1px solid var(--divider); }
+
+    /* Team logo */
+    .team-logo {
+      width: 90px;
+      height: 90px;
+      object-fit: contain;
+      display: none;
+      border-radius: 6px;
+    }
+    .team-logo.visible { display: block; }
+
+    .team-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 48px;
+      letter-spacing: 8px;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .big-score {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 220px;
+      line-height: 0.9;
+      letter-spacing: -6px;
+    }
+    .team-block.home .big-score { color: var(--home-color); }
+    .team-block.away .big-score { color: var(--away-color); }
+
+    .big-score.bump { animation: bump 0.3s ease; }
+    @keyframes bump {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.06); }
+      100% { transform: scale(1); }
+    }
+
+    /* fouls row under score */
+    .fouls-under {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .fouls-under-label {
+      font-size: 13px;
+      letter-spacing: 3px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .fouls-under-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 36px;
+      color: var(--text);
+      transition: color 0.3s, font-size 0.2s;
+    }
+    .fouls-under-num.penalty {
+      font-size: 24px;
+      letter-spacing: 2px;
+      color: var(--red);
+      text-shadow: 0 0 12px rgba(255,51,51,0.7);
+      animation: penalty-pulse 1s ease-in-out infinite alternate;
+    }
+    @keyframes penalty-pulse {
+      from { text-shadow: 0 0 8px rgba(255,51,51,0.4); }
+      to   { text-shadow: 0 0 22px rgba(255,51,51,1); }
+    }
+    .fouls-pips {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .fouls-pip {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid #333;
+      background: transparent;
+    }
+    .fouls-pip.active.home { background: var(--home-color); border-color: var(--home-color); box-shadow: 0 0 6px var(--home-color); }
+    .fouls-pip.active.away { background: var(--away-color); border-color: var(--away-color); box-shadow: 0 0 6px var(--away-color); }
+
+    /* ── Center clocks ── */
+    .center-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      padding: 36px 32px;
+      min-width: 280px;
+    }
+
+    .clock-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .clock-label {
+      font-size: 11px;
+      letter-spacing: 4px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .quarter-clock {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 68px;
+      letter-spacing: 2px;
+      color: var(--yellow);
+      text-shadow: 0 0 20px rgba(255,214,0,0.3);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      transition: color 0.5s;
+    }
+    .quarter-clock .ms {
+      font-size: 42px;
+      opacity: 0.72;
+      vertical-align: baseline;
+    }
+    .quarter-clock.running {
+      animation: qc-pulse 1s ease-in-out infinite alternate;
+    }
+    @keyframes qc-pulse {
+      from { text-shadow: 0 0 10px rgba(255,214,0,0.25); }
+      to   { text-shadow: 0 0 36px rgba(255,214,0,0.85); }
+    }
+
+    .period-divider {
+      width: 100%;
+      border-top: 1px solid var(--divider);
+      border-bottom: 1px solid var(--divider);
+      padding: 14px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+    .period-big {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 64px;
+      color: var(--text);
+      line-height: 1;
+    }
+    .period-sub {
+      font-size: 11px;
+      letter-spacing: 4px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .shot-clock-display {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 100px;
+      line-height: 1;
+      color: var(--red);
+      text-shadow: 0 0 16px rgba(255,51,51,0.35);
+      min-width: 120px;
+      text-align: center;
+      letter-spacing: 2px;
+    }
+    .shot-clock-display.running  { animation: sc-pulse 0.8s ease-in-out infinite alternate; }
+    .shot-clock-display.warning  { color: #FF9900; text-shadow: 0 0 20px rgba(255,153,0,0.65); }
+    .shot-clock-display.critical { color: var(--red); animation: sc-flash 0.4s ease-in-out infinite alternate; }
+    @keyframes sc-pulse {
+      from { text-shadow: 0 0 10px rgba(255,51,51,0.25); }
+      to   { text-shadow: 0 0 32px rgba(255,51,51,0.85); }
+    }
+    @keyframes sc-flash {
+      from { opacity: 1; }
+      to   { opacity: 0.3; }
+    }
+
+    /* ── Possession bar ── */
+    .possession-bar {
+      background: var(--panel2);
+      border-top: 1px solid var(--divider);
+      padding: 16px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      transition: background 0.5s;
+    }
+    .poss-label {
+      font-size: 12px;
+      letter-spacing: 4px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .poss-indicator { display: flex; align-items: center; gap: 16px; }
+    .poss-team {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 32px;
+      letter-spacing: 5px;
+      transition: opacity 0.4s, color 0.5s;
+    }
+    .poss-team.home { color: var(--home-color); }
+    .poss-team.away { color: var(--away-color); }
+    .poss-team.inactive { opacity: 0.15; }
+    .poss-arrow-icon {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 42px;
+      transition: all 0.4s;
+    }
+    .poss-arrow-icon.home { color: var(--home-color); }
+    .poss-arrow-icon.away { color: var(--away-color); }
+
+    /* ── Footer ── */
+    .viewer-footer {
+      margin-top: 10px;
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: #2a2a2a;
+      text-transform: uppercase;
+      text-align: center;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="viewer">
+
+    <div class="top-bar">
+      <span class="top-bar-brand" id="vLeagueName">⬡ Hoops</span>
+      <span class="top-bar-period" id="vPeriodLabel">—</span>
+      <span class="live-badge">Live</span>
+    </div>
+
+    <div class="scores-row">
+
+      <!-- Home -->
+      <div class="team-block home">
+        <img class="team-logo" id="vHomeLogo" src="" alt="Home logo" />
+        <div class="team-name" id="vHomeName">HOME</div>
+        <div class="big-score" id="vHomeScore">—</div>
+        <div class="fouls-under">
+          <span class="fouls-under-label">Fouls</span>
+          <span class="fouls-under-num" id="vHomeFoulsNum">0</span>
+          <div class="fouls-pips" id="vHomePips"></div>
+        </div>
+      </div>
+
+      <!-- Center clocks -->
+      <div class="center-block">
+        <div class="clock-group">
+          <div class="clock-label">Quarter Clock</div>
+          <div class="quarter-clock" id="vTimer">—</div>
+        </div>
+        <div class="period-divider">
+          <div class="period-big" id="vPeriodNum">—</div>
+          <div class="period-sub">Period</div>
+        </div>
+        <div class="clock-group">
+          <div class="clock-label">Shot Clock</div>
+          <div class="shot-clock-display" id="vShotClock">—</div>
+        </div>
+      </div>
+
+      <!-- Away -->
+      <div class="team-block away">
+        <img class="team-logo" id="vAwayLogo" src="" alt="Away logo" />
+        <div class="team-name" id="vAwayName">AWAY</div>
+        <div class="big-score" id="vAwayScore">—</div>
+        <div class="fouls-under">
+          <div class="fouls-pips" id="vAwayPips"></div>
+          <span class="fouls-under-num" id="vAwayFoulsNum">0</span>
+          <span class="fouls-under-label">Fouls</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="possession-bar">
+      <span class="poss-label">Ball Possession</span>
+      <div class="poss-indicator">
+        <span class="poss-team home" id="vPossHomeName">HOME</span>
+        <span class="poss-arrow-icon home" id="vPossArrow">▶</span>
+        <span class="poss-team away" id="vPossAwayName">AWAY</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="viewer-footer" style="display:flex;align-items:center;gap:16px;justify-content:center;">
+    <span>Viewer — open index.html on the same device to operate the scoreboard</span>
+    <button onclick="window.open('index.html','_blank')" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;background:none;border:1px solid #333;color:#444;padding:4px 12px;cursor:pointer;border-radius:2px;transition:all 0.2s;" onmouseover="this.style.borderColor='#FF5E1A';this.style.color='#FF5E1A'" onmouseout="this.style.borderColor='#333';this.style.color='#444'">⚙ Open Control</button>
+  </div>
+
+  <script>
+    const MAX_FOULS = 5;
+    let prevScores = { home: null, away: null };
+    let prevTheme  = null;
+    let prevHomeLogoData = null;
+    let prevAwayLogoData = null;
+
+    function formatTimerHTML(cs) {
+      if (cs === null || cs === undefined) return '—';
+      const totalSecs = Math.floor(cs / 100);
+      const m  = Math.floor(totalSecs / 60);
+      const s  = totalSecs % 60;
+      const cc = Math.floor(cs % 100);
+      const main = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+      return main + '<span class="ms">.' + String(cc).padStart(2,'0') + '</span>';
+    }
+
+    function buildPips(containerId, count, team) {
+      const el = document.getElementById(containerId);
+      el.innerHTML = '';
+      for (let i = 0; i < MAX_FOULS; i++) {
+        const pip = document.createElement('div');
+        pip.className = 'fouls-pip ' + team;
+        if (count > i) pip.classList.add('active');
+        el.appendChild(pip);
+      }
+    }
+
+    function bump(id) {
+      const el = document.getElementById(id);
+      el.classList.remove('bump');
+      void el.offsetWidth;
+      el.classList.add('bump');
+    }
+
+    function updateViewerFoulDisplay(id, count) {
+      const el = document.getElementById(id);
+      if (count >= MAX_FOULS) {
+        el.textContent = 'PENALTY';
+        el.classList.add('penalty');
+      } else {
+        el.textContent = count;
+        el.classList.remove('penalty');
+      }
+    }
+
+    function applyViewerTheme(t) {
+      const r = document.documentElement.style;
+      r.setProperty('--accent',     t.accent);
+      r.setProperty('--home-color', t.homeColor);
+      r.setProperty('--away-color', t.awayColor);
+      r.setProperty('--yellow',     t.yellow);
+      r.setProperty('--dark',       t.dark);
+      r.setProperty('--panel',      t.panel);
+      // derive panel2 and divider
+      r.setProperty('--panel2',  lighten(t.panel, 10));
+      r.setProperty('--divider', lighten(t.panel, 20));
+    }
+
+    function lighten(hex, amt) {
+      hex = hex.replace('#','');
+      if (hex.length === 3) hex = hex.split('').map(function(c){return c+c;}).join('');
+      const r = Math.min(255, parseInt(hex.slice(0,2),16) + amt);
+      const g = Math.min(255, parseInt(hex.slice(2,4),16) + amt);
+      const b = Math.min(255, parseInt(hex.slice(4,6),16) + amt);
+      return '#' + [r,g,b].map(function(v){return v.toString(16).padStart(2,'0');}).join('');
+    }
+
+    function updateLogo(imgId, dataUrl) {
+      const img = document.getElementById(imgId);
+      if (dataUrl) {
+        img.src = dataUrl;
+        img.classList.add('visible');
+      } else {
+        img.src = '';
+        img.classList.remove('visible');
+      }
+    }
+
+    function refresh() {
+      const raw = localStorage.getItem('scoreboard');
+      if (!raw) return;
+
+      let s;
+      try { s = JSON.parse(raw); } catch (e) { return; }
+
+      // Theme — apply only when changed (avoid constant reflow)
+      if (s.theme) {
+        const themeKey = JSON.stringify(s.theme);
+        if (themeKey !== prevTheme) {
+          applyViewerTheme(s.theme);
+          prevTheme = themeKey;
+        }
+      }
+
+      // Team logos
+      if (s.homeLogoData !== prevHomeLogoData) {
+        updateLogo('vHomeLogo', s.homeLogoData);
+        prevHomeLogoData = s.homeLogoData;
+      }
+      if (s.awayLogoData !== prevAwayLogoData) {
+        updateLogo('vAwayLogo', s.awayLogoData);
+        prevAwayLogoData = s.awayLogoData;
+      }
+
+      // League name
+      if (s.leagueName) document.getElementById('vLeagueName').textContent = '⬡ ' + s.leagueName;
+
+      // Names
+      document.getElementById('vHomeName').textContent = s.homeName || 'HOME';
+      document.getElementById('vAwayName').textContent = s.awayName || 'AWAY';
+
+      // Scores
+      if (prevScores.home !== s.homeScore) {
+        document.getElementById('vHomeScore').textContent = s.homeScore;
+        if (prevScores.home !== null) bump('vHomeScore');
+        prevScores.home = s.homeScore;
+      }
+      if (prevScores.away !== s.awayScore) {
+        document.getElementById('vAwayScore').textContent = s.awayScore;
+        if (prevScores.away !== null) bump('vAwayScore');
+        prevScores.away = s.awayScore;
+      }
+
+      // Fouls
+      updateViewerFoulDisplay('vHomeFoulsNum', s.homeFouls);
+      updateViewerFoulDisplay('vAwayFoulsNum', s.awayFouls);
+      buildPips('vHomePips', s.homeFouls, 'home');
+      buildPips('vAwayPips', s.awayFouls, 'away');
+
+      // Period
+      document.getElementById('vPeriodNum').textContent  = s.period;
+      document.getElementById('vPeriodLabel').textContent = s.periodLabel || '';
+
+      // Quarter clock
+      const timerEl = document.getElementById('vTimer');
+      timerEl.innerHTML = formatTimerHTML(s.timerCentiseconds);
+      timerEl.classList.toggle('running', !!s.timerRunning);
+
+      // Shot clock
+      const scEl = document.getElementById('vShotClock');
+      scEl.textContent = s.shotClockSeconds;
+      scEl.classList.remove('warning','critical','running');
+      if (s.shotClockSeconds <= 5)       scEl.classList.add('critical');
+      else if (s.shotClockSeconds <= 10) scEl.classList.add('warning');
+      if (s.shotClockRunning)            scEl.classList.add('running');
+
+      // Possession
+      const homeTeam = s.homeName || 'HOME';
+      const awayTeam = s.awayName || 'AWAY';
+      document.getElementById('vPossHomeName').textContent = homeTeam;
+      document.getElementById('vPossAwayName').textContent = awayTeam;
+      const isHome = s.possession === 'home';
+      document.getElementById('vPossHomeName').classList.toggle('inactive', !isHome);
+      document.getElementById('vPossAwayName').classList.toggle('inactive',  isHome);
+      const arrow = document.getElementById('vPossArrow');
+      arrow.textContent = isHome ? '▶' : '◀';
+      arrow.className   = 'poss-arrow-icon ' + (isHome ? 'home' : 'away');
+    }
+
+    refresh();
+    setInterval(refresh, 50);
+  </script>
+</body>
+</html>
